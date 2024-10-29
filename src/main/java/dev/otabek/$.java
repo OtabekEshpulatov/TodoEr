@@ -13,6 +13,12 @@ import java.nio.file.Paths;
 
 public class $ {
 
+
+    public static boolean isEmpty(String str) {
+        return str == null || str.isEmpty();
+    }
+
+
     public static void openFileAtLine(Project project, String filePath, int line, int column) {
         // Find the virtual file from the given file path
         VirtualFile file = LocalFileSystem.getInstance().findFileByPath(Paths.get(filePath).toAbsolutePath().toString());

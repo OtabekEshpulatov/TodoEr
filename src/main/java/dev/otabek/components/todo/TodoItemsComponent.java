@@ -16,7 +16,7 @@ public class TodoItemsComponent extends JBScrollPane {
 
 
     public TodoItemsComponent(Collection<TodoItemDto> items, Project project) {
-        setViewportView(new TodoItemsPanel(items, project));
+        super(new TodoItemsPanel(items, project));
         setBorder(null);
     }
 
