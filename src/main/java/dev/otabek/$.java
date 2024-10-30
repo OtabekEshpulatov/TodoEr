@@ -3,6 +3,7 @@ package dev.otabek;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
@@ -35,7 +36,8 @@ public class $ {
                     // Move to the specific line and column
                     caretModel.moveToOffset(editor.getDocument().getLineStartOffset(line - 1) + column - 1);
 
-                    editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
+                    LogicalPosition logicalPosition = new LogicalPosition(line - 1, column - 1);
+                    editor.getScrollingModel().scrollTo(logicalPosition, ScrollType.CENTER);
                 }
             });
         } else {

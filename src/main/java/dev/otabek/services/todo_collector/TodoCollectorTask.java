@@ -13,40 +13,25 @@ import java.util.concurrent.RecursiveTask;
 
 public class TodoCollectorTask extends RecursiveTask<Collection<TodoItemDto>> {
 
+    private static final int FILES_PER_TASK_THRESHOLD = 10;
+
     // list of files paths. if we find any todos in any file, we create todoItem object
     private final List<String> filePaths;
-    private final TodoCollectorHelper patternHelper;
 
-    public TodoCollectorTask(List<String> filePaths, TodoCollectorHelper patternHelper) {
+    private final TodoCollectorHelper collectorHelper;
+
+    public TodoCollectorTask(List<String> filePaths, TodoCollectorHelper collectorHelper) {
         this.filePaths = filePaths;
-        this.patternHelper = patternHelper;
+        this.collectorHelper = collectorHelper;
     }
 
     @Override
     protected Collection<TodoItemDto> compute() {
-        final int FILES_PER_TASK_THRESHOLD = 10;
         if (filePaths.size() > FILES_PER_TASK_THRESHOLD) {
-            List<TodoCollectorTask> subtasks = createSubtasks();
-            invokeAll(subtasks);
-
-            LinkedList<TodoItemDto> todos = new LinkedList<>();
-            for (TodoCollectorTask subtask : subtasks) {
-                todos.addAll(subtask.join());
-            }
-            return todos;
+            return invokeSubtasks();
         } else {
             return processTask();
         }
-    }
-
-    private List<TodoCollectorTask> createSubtasks() {
-        int overallFilesCount = filePaths.size();
-        List<String> firstPart = this.filePaths.subList(0, overallFilesCount / 2);
-        List<String> secondPart = this.filePaths.subList(overallFilesCount / 2, overallFilesCount);
-
-        TodoCollectorTask firstTask = new TodoCollectorTask(firstPart, patternHelper);
-        TodoCollectorTask secondTask = new TodoCollectorTask(secondPart, patternHelper);
-        return List.of(firstTask, secondTask);
     }
 
     private Collection<TodoItemDto> processTask() {
@@ -58,6 +43,23 @@ public class TodoCollectorTask extends RecursiveTask<Collection<TodoItemDto>> {
         return todos;
     }
 
+    private LinkedList<TodoItemDto> invokeSubtasks() {
+        int overallFilesCount = filePaths.size();
+        List<String> filesFirstPart = this.filePaths.subList(0, overallFilesCount / 2);
+        List<String> filesSecondPart = this.filePaths.subList(overallFilesCount / 2, overallFilesCount);
+
+        var firstTask = new TodoCollectorTask(filesFirstPart, collectorHelper);
+        var secondTask = new TodoCollectorTask(filesSecondPart, collectorHelper);
+
+        invokeAll(firstTask, secondTask);
+
+        LinkedList<TodoItemDto> todos = new LinkedList<>();
+        todos.addAll(firstTask.join());
+        todos.addAll(secondTask.join());
+        return todos;
+    }
+
+
     private Collection<TodoItemDto> collectTodos(String filePath) {
         LinkedList<TodoItemDto> todos = new LinkedList<>();
 
@@ -68,8 +70,8 @@ public class TodoCollectorTask extends RecursiveTask<Collection<TodoItemDto>> {
                 String line = allLines.get(i).trim();
                 if ($.isEmpty(line)) continue;
 
-                if (patternHelper.isTodo(line)) {
-                    var todo = new TodoItemDto(filePath, line, i + 1, 0);
+                if (collectorHelper.isTodo(line)) {
+                    var todo = new TodoItemDto(filePath, line, i + 1, 1);
                     todos.add(todo);
                 }
             }

@@ -21,12 +21,14 @@ public class TodoErAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
-
+        Project project = event.getProject();
         VirtualFile[] data = event.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY);
-
-        if (data != null) {
-            Project project = event.getProject();
+        if (data != null && project != null) {
+            long started = System.currentTimeMillis();
             Collection<TodoItemDto> todos = service.getTodos(data);
+            long ended = System.currentTimeMillis();
+
+            System.out.printf("collecting todos took %d ms %n", ended - started);
             new TodoItemsDialogWrapper(todos, project).show();
         }
 

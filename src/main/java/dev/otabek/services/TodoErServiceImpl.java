@@ -43,16 +43,12 @@ public class TodoErServiceImpl implements TodoErService {
     @Override
     public Collection<TodoItemDto> getTodos(VirtualFile[] data) {
         if (data == null) return null;
-
         LinkedList<String> filePaths = getAllSupportedFilesPath(data);
 
-        int parallelism = Runtime.getRuntime().availableProcessors();
-        System.out.println(parallelism);
-        var forkJoinPool = new ForkJoinPool(parallelism);
+        var forkJoinPool = ForkJoinPool.commonPool();
+        var todoHelper = new TodoCollectorHelper();
 
-        // todo: fetch todo patterns from intellij settings
-        String[] todoPatterns = {"\\btodo\\b.*"};
-        var todoHelper = new TodoCollectorHelper(todoPatterns);
+        System.out.printf("n.of files to check for todos: %d %n", filePaths.size());
         var collectorTask = new TodoCollectorTask(filePaths, todoHelper);
 
         forkJoinPool.execute(collectorTask);
