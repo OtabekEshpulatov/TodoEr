@@ -3,6 +3,7 @@ package dev.otabek.services.todo_collector;
 import com.intellij.ide.todo.TodoConfiguration;
 import com.intellij.psi.search.TodoPattern;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TodoCollectorHelper {
@@ -16,8 +17,9 @@ public class TodoCollectorHelper {
 
     public boolean isTodo(String str) {
         for (TodoPattern todoPattern : patterns) {
-            String pattern = todoPattern.getPatternString();
-            boolean matchFound = Pattern.compile(pattern).matcher(str).find();
+            Matcher matcher = Pattern.compile(todoPattern.getPatternString(),
+                    Pattern.CASE_INSENSITIVE).matcher(str);
+            boolean matchFound = matcher.find();
             if (matchFound) {
                 return true;
             }

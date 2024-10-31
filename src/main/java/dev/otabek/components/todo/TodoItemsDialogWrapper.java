@@ -49,7 +49,7 @@ public class TodoItemsDialogWrapper extends DialogWrapper {
 
         Box box = Box.createHorizontalBox();
         box.add(component);
-        box.setPreferredSize(new Dimension(700, 600));
+        box.setMinimumSize(new Dimension(400, 400));
 
         return box;
     }
